@@ -36,7 +36,7 @@ func (w *WebsocketData) MessageCount() int64 {
 }
 
 func (w *WebsocketData) MessageRate() int64 {
-	return w.counter.Rate() / w.rate
+	return w.counter.Rate() / w.counterRate
 }
 
 type WebsocketStatus struct {
