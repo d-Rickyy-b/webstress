@@ -95,6 +95,17 @@ func (w *Worker) run() {
 	}
 	defer c.Close()
 
+	c.SetCloseHandler(func(code int, text string) error {
+		switch code {
+		case websocket.CloseNoStatusReceived:
+			w.logger.Log(fmt.Sprintf("[Worker %d] Stopping websocket - Server received no ping\n", w.WSData.ID+1))
+		default:
+			w.logger.Log(fmt.Sprintf("[Worker %d] Stopping websocket - %s\n", w.WSData.ID+1, text))
+		}
+		message := websocket.FormatCloseMessage(code, "Connection closed")
+		return c.WriteControl(websocket.CloseMessage, message, time.Now().Add(time.Second))
+	})
+
 	done := make(chan struct{})
 
 	// Start background goroutine to read messages from the websocket
