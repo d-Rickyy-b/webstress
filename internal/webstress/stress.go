@@ -84,12 +84,10 @@ func (w *Worker) run() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	//log.Printf("[Worker %d] connecting to %s\n", w.WSData.ID, w.addr)
 	w.logger.Log(fmt.Sprintf("[Worker %d] connecting to %s\n", w.WSData.ID+1, w.addr))
 	header := http.Header{"User-Agent": []string{"Webstress/1.0 (github.com/d-Rickyy-b/webstress)"}}
 	c, _, err := websocket.DefaultDialer.Dial(w.addr, header)
 	if err != nil {
-		//log.Fatalf("[Worker %d] Error while connecting to websocket: %v\n", w.WSData.ID, err)
 		w.logger.Log(fmt.Sprintf("[Worker %d] Error while connecting to websocket: %v\n", w.WSData.ID+1, err))
 		return
 	}
@@ -114,8 +112,11 @@ func (w *Worker) run() {
 		for {
 			_, _, err := c.ReadMessage()
 			if err != nil {
-				w.logger.Log(fmt.Sprintf("Error while reading message: %v\n", err))
-				//log.Printf("[Worker %d] Error while reading message: %v\n", w.WSData.ID, err)
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
+					w.logger.Log(fmt.Sprintf("[Worker %d] Error while reading message: %v\n", w.WSData.ID+1, err))
+					return
+				}
+				w.logger.Log(fmt.Sprintf("[Worker %d] Error while reading message: %v\n", w.WSData.ID+1, err))
 				return
 			}
 			w.WSData.IncCounter()
@@ -135,8 +136,7 @@ func (w *Worker) run() {
 		case <-pingTicker.C:
 			err := c.WriteMessage(websocket.PingMessage, []byte{})
 			if err != nil {
-				w.logger.Log(fmt.Sprintf("Error while writing ping message: %v\n", err))
-				//log.Printf("[Worker %d] Error while writing ping message: %v\n", w.WSData.ID, err)
+				w.logger.Log(fmt.Sprintf("[Worker %d] Error while writing ping message: %v\n", w.WSData.ID+1, err))
 				return
 			}
 		case <-interrupt:
@@ -144,8 +144,7 @@ func (w *Worker) run() {
 			// waiting (with timeout) for the server to close the connection.
 			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
-				w.logger.Log(fmt.Sprintf("Error while writing close message: %v\n", err))
-				//log.Printf("[Worker %d] Error while closing websocket: %v\n", w.WSData.ID, err)
+				w.logger.Log(fmt.Sprintf("[Worker %d] Error while writing close message: %v\n", w.WSData.ID+1, err))
 				return
 			}
 			select {
