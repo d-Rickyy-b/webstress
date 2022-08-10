@@ -8,12 +8,12 @@ import (
 )
 
 type UI struct {
-	app               *tview.Application
-	Logger            *models.Logger
-	websocketBox      *models.WebsocketView
-	loggerView        *models.LoggerView
-	messagesPerSecBox *tview.Box
-	infoBox           *models.InfoBox
+	app          *tview.Application
+	Logger       *models.Logger
+	websocketBox *models.WebsocketView
+	loggerView   *models.LoggerView
+	graphView    *models.GraphView
+	infoBox      *models.InfoBox
 }
 
 func NewUI(websocketCount int, logger *models.Logger) *UI {
@@ -27,7 +27,7 @@ func (ui *UI) Init(websocketCount int) {
 	app := tview.NewApplication()
 	ui.loggerView = models.NewLoggerView()
 	ui.websocketBox = models.NewWebsocketView(websocketCount)
-	ui.messagesPerSecBox = tview.NewBox().SetBorder(true).SetTitle(" Messages / Second ")
+	ui.graphView = models.NewGraphView()
 	ui.infoBox = models.NewInfoBox()
 
 	// Layout the UI
@@ -36,7 +36,7 @@ func (ui *UI) Init(websocketCount int) {
 			AddItem(ui.websocketBox, 0, 1, false).
 			AddItem(tview.NewFlex().SetDirection(tview.FlexColumn).
 				AddItem(ui.loggerView, 0, 1, false).
-				AddItem(ui.messagesPerSecBox, 0, 1, false),
+				AddItem(ui.graphView, 0, 1, false),
 				0, 1, false).
 			AddItem(ui.infoBox, 1, 0, false),
 			0, 2, false)
@@ -51,6 +51,7 @@ func (ui *UI) RegisterWebstress(ws *webstress.WebStress) {
 	ui.infoBox.Addr = ws.Addr
 	ui.infoBox.Connections = ui.websocketBox.Connections
 	ui.infoBox.MsgCounter = ws.MsgCounter
+	ui.graphView.Counter = ws.MsgCounter
 }
 
 func (ui *UI) Run() {
