@@ -56,7 +56,7 @@ func (ui *UI) RegisterWebstress(ws *webstress.WebStress) {
 
 func (ui *UI) Run() {
 	go func() {
-		tick := time.NewTicker(150 * time.Millisecond)
+		tick := time.NewTicker(200 * time.Millisecond)
 		for {
 			select {
 			case <-tick.C:
