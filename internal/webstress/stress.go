@@ -3,7 +3,6 @@ package webstress
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
-	"github.com/paulbellamy/ratecounter"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,10 +12,11 @@ import (
 )
 
 type WebStress struct {
-	Workers []*Worker
-	Addr    string
-	logger  *models.Logger
-	wg      sync.WaitGroup
+	Workers    []*Worker
+	Addr       string
+	logger     *models.Logger
+	MsgCounter *models.MsgCounter
+	wg         sync.WaitGroup
 }
 
 type Worker struct {
@@ -30,10 +30,10 @@ type Worker struct {
 func (webstress *WebStress) Init(url string, workerCount int, pingInterval int) {
 	webstress.Addr = url
 	webstress.logger.Log(fmt.Sprintf("Starting %d workers, pingInterval: %d\n", workerCount, pingInterval))
-	counter := ratecounter.NewRateCounter(5 * time.Second)
+	webstress.MsgCounter = models.NewMsgCounter(5)
 
 	for i := 0; i < workerCount; i++ {
-		w := Worker{addr: url, pingInterval: pingInterval, wg: &webstress.wg, WSData: models.NewWebsocketData(i, counter), logger: webstress.logger}
+		w := Worker{addr: url, pingInterval: pingInterval, wg: &webstress.wg, WSData: models.NewWebsocketData(i, webstress.MsgCounter), logger: webstress.logger}
 		webstress.Workers = append(webstress.Workers, &w)
 	}
 }
@@ -50,28 +50,8 @@ func (webstress *WebStress) Start() {
 	webstress.wg.Wait()
 }
 
-func (webstress *WebStress) CountMessages() (count int64) {
-	for _, w := range webstress.Workers {
-		count += w.MessageCount()
-	}
-	return count
-}
-
-func (webstress *WebStress) GetConnections() (count int) {
-	for _, worker := range webstress.Workers {
-		if worker.WSData.Connected {
-			count++
-		}
-	}
-	return count
-}
-
 func (webstress *WebStress) SetLogger(l *models.Logger) {
 	webstress.logger = l
-}
-
-func (w Worker) MessageCount() int64 {
-	return w.WSData.MessageCount()
 }
 
 func (w *Worker) run() {

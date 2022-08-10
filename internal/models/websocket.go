@@ -3,7 +3,6 @@ package models
 import (
 	"fmt"
 	"github.com/gdamore/tcell/v2"
-	"github.com/paulbellamy/ratecounter"
 	"github.com/rivo/tview"
 	"strconv"
 	"sync/atomic"
@@ -12,40 +11,23 @@ import (
 
 type WebsocketData struct {
 	ID           int
-	messageCount int64
-	counter      *ratecounter.RateCounter
-	counterRate  int64
+	messageCount uint64
+	counter      *MsgCounter
+	counterRate  uint64
 	Connected    bool
 }
 
-func NewWebsocketData(id int, counter *ratecounter.RateCounter) *WebsocketData {
+func NewWebsocketData(id int, counter *MsgCounter) *WebsocketData {
 	return &WebsocketData{ID: id, counter: counter, counterRate: 5}
 }
 
-func (w *WebsocketData) SetCounter(c int64) {
-	atomic.StoreInt64(&w.messageCount, c)
-}
-
 func (w *WebsocketData) IncCounter() {
-	w.counter.Incr(1)
-	atomic.AddInt64(&w.messageCount, 1)
+	w.counter.Incr()
+	atomic.AddUint64(&w.messageCount, 1)
 }
 
-func (w *WebsocketData) MessageCount() int64 {
-	return atomic.LoadInt64(&w.messageCount)
-}
-
-func (w *WebsocketData) MessageRate() int64 {
-	return w.counter.Rate() / w.counterRate
-}
-
-type WebsocketStatus struct {
-	*WebsocketData
-}
-
-func (w *WebsocketData) GetDisplayLength() int {
-	tmpStr := fmt.Sprintf("%d:%d", w.ID, w.MessageCount())
-	return len(tmpStr)
+func (w *WebsocketData) MessageCount() uint64 {
+	return atomic.LoadUint64(&w.messageCount)
 }
 
 // WebsocketView is the full view that contains all the individual websocket boxes

@@ -47,11 +47,12 @@ func (ui *UI) Init(websocketCount int) {
 
 func (ui *UI) RegisterWebstress(ws *webstress.WebStress) {
 	ui.addr = ws.Addr
-	ui.infoBox.Addr = ws.Addr
 	for i, worker := range ws.Workers {
 		ui.websocketBox.Connections[i] = worker.WSData
 	}
+	ui.infoBox.Addr = ws.Addr
 	ui.infoBox.Connections = ui.websocketBox.Connections
+	ui.infoBox.MsgCounter = ws.MsgCounter
 }
 
 func (ui *UI) Run() {
