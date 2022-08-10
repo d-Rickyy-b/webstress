@@ -39,8 +39,6 @@ func (l *Logger) GetLastEntries(num int) []string {
 	defer l.mu.RUnlock()
 	result := make([]string, num)
 
-	// TODO get last num entries from buff
-
 	newIndex := calculateRingbufferOffset(len(l.buff), l.index, -num)
 	for i := 0; i < num; i++ {
 		index := (newIndex + i) % len(l.buff)
