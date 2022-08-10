@@ -16,8 +16,8 @@ func main() {
 	_ = noUI
 	flag.Parse()
 
-	if !strings.HasPrefix(*remoteAddr, "ws://") {
-		*remoteAddr = "ws://" + *remoteAddr
+	if !strings.HasPrefix(*remoteAddr, "ws://") && !strings.HasPrefix(*remoteAddr, "wss://") {
+		*remoteAddr = "wss://" + *remoteAddr
 	}
 
 	// TODO feature: flag to enable or disable CUI
