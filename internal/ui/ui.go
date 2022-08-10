@@ -60,7 +60,6 @@ func (ui *UI) Run() {
 		for {
 			select {
 			case <-tick.C:
-				//app.Draw()
 				ui.app.QueueUpdateDraw(func() {})
 			}
 		}
