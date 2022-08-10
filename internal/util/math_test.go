@@ -3,9 +3,6 @@ package util
 import "testing"
 
 func Test_numOfChars(t *testing.T) {
-	type args struct {
-		n int
-	}
 	tests := []struct {
 		name  string
 		input int
