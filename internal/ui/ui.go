@@ -14,7 +14,6 @@ type UI struct {
 	loggerView        *models.LoggerView
 	messagesPerSecBox *tview.Box
 	infoBox           *models.InfoBox
-	addr              string
 }
 
 func NewUI(websocketCount int, logger *models.Logger) *UI {
@@ -46,7 +45,6 @@ func (ui *UI) Init(websocketCount int) {
 }
 
 func (ui *UI) RegisterWebstress(ws *webstress.WebStress) {
-	ui.addr = ws.Addr
 	for i, worker := range ws.Workers {
 		ui.websocketBox.Connections[i] = worker.WSData
 	}
