@@ -2,11 +2,12 @@ package models
 
 import (
 	"fmt"
-	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
 	"strconv"
 	"sync/atomic"
-	"webstress/internal/util"
+
+	"github.com/d-Rickyy-b/webstress/internal/util"
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 type WebsocketData struct {

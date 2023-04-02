@@ -1,10 +1,11 @@
 package ui
 
 import (
-	"github.com/rivo/tview"
 	"time"
-	"webstress/internal/models"
-	"webstress/internal/webstress"
+
+	"github.com/d-Rickyy-b/webstress/internal/models"
+	"github.com/d-Rickyy-b/webstress/internal/webstress"
+	"github.com/rivo/tview"
 )
 
 type UI struct {

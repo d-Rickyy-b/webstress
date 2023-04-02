@@ -1,5 +1,6 @@
 # Webstress
 [![build](https://github.com/d-Rickyy-b/webstress/actions/workflows/release_build.yml/badge.svg)](https://github.com/d-Rickyy-b/webstress/actions/workflows/release_build.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/d-Rickyy-b/webstress/.svg)](https://pkg.go.dev/github.com/d-Rickyy-b/webstress/)
 
 While developing my tool [certstream-server-go](https://github.com/d-Rickyy-b/certstream-server-go), I was searching for a tool to stress test my websocket server.
 Not by sending requests, but by immitating the behaviour of a client that's on the receiving end.

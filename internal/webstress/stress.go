@@ -2,13 +2,14 @@ package webstress
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"time"
-	"webstress/internal/models"
+
+	"github.com/d-Rickyy-b/webstress/internal/models"
+	"github.com/gorilla/websocket"
 )
 
 type WebStress struct {

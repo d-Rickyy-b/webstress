@@ -2,10 +2,11 @@ package models
 
 import (
 	"fmt"
+	"sync"
+
+	"github.com/d-Rickyy-b/webstress/internal/util"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"sync"
-	"webstress/internal/util"
 )
 
 type GraphView struct {

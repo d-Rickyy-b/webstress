@@ -1,9 +1,10 @@
 package models
 
 import (
-	"github.com/paulbellamy/ratecounter"
 	"sync/atomic"
 	"time"
+
+	"github.com/paulbellamy/ratecounter"
 )
 
 type MsgCounter struct {

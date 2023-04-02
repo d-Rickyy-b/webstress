@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"strings"
-	"webstress/internal/models"
-	"webstress/internal/ui"
-	"webstress/internal/webstress"
+
+	"github.com/d-Rickyy-b/webstress/internal/models"
+	"github.com/d-Rickyy-b/webstress/internal/ui"
+	"github.com/d-Rickyy-b/webstress/internal/webstress"
 )
 
 func main() {

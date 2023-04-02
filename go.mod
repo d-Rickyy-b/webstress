@@ -1,4 +1,4 @@
-module webstress
+module github.com/d-Rickyy-b/webstress
 
 go 1.18
 
