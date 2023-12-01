@@ -27,8 +27,13 @@ func (i *InfoBox) Draw(screen tcell.Screen) {
 	totalMessages := i.MsgCounter.Count()
 	rate := i.MsgCounter.Rate()
 
+	activeConnections := i.GetActiveConnections()
+	if activeConnections == 0 {
+		activeConnections = 1
+	}
+
 	format := "%s | Connections: [%d/%d] | Total Messages: %d | Msg/s: %d/s | Msg/s/Socket: %d/s"
-	text := fmt.Sprintf(format, i.Addr, i.GetActiveConnections(), len(i.Connections), totalMessages, rate, rate/uint64(len(i.Connections)))
+	text := fmt.Sprintf(format, i.Addr, i.GetActiveConnections(), len(i.Connections), totalMessages, rate, rate/uint64(activeConnections))
 
 	tview.Print(screen, text, x+1, y, width-2, tview.AlignCenter, tcell.ColorWhite)
 
