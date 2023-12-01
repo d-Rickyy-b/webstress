@@ -13,6 +13,7 @@ func main() {
 	var workerCount = flag.Int("workerCount", 30, "number of workers to start")
 	var pingInterval = flag.Int("pingInterval", 30, "number of seconds between pings")
 	var remoteAddr = flag.String("remoteAddr", "ws://localhost:8080/", "remote address to connect to")
+	var recoverError = flag.Bool("recover", true, "recover from certain errors")
 	var noUI = flag.Bool("noUI", false, "use to disable the UI")
 	_ = noUI
 	flag.Parse()
@@ -31,7 +32,7 @@ func main() {
 
 	stress := &webstress.WebStress{}
 	stress.SetLogger(logger)
-	stress.Init(*remoteAddr, *workerCount, *pingInterval)
+	stress.Init(*remoteAddr, *workerCount, *pingInterval, *recoverError)
 	go stress.Start()
 
 	cui.RegisterWebstress(stress)

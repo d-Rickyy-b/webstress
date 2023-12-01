@@ -1,7 +1,9 @@
 package webstress
 
 import (
+	"errors"
 	"fmt"
+	"github.com/gorilla/websocket"
 	"net/http"
 	"os"
 	"os/signal"
@@ -9,8 +11,10 @@ import (
 	"time"
 
 	"github.com/d-Rickyy-b/webstress/internal/models"
-	"github.com/gorilla/websocket"
 )
+
+var RecoverableError = errors.New("recoverable error")
+var UnrecoverableError = errors.New("unrecoverable error")
 
 type WebStress struct {
 	Workers    []*Worker
@@ -26,15 +30,16 @@ type Worker struct {
 	WSData       *models.WebsocketData
 	logger       *models.Logger
 	wg           *sync.WaitGroup
+	recover      bool
 }
 
-func (webstress *WebStress) Init(url string, workerCount int, pingInterval int) {
+func (webstress *WebStress) Init(url string, workerCount int, pingInterval int, recover bool) {
 	webstress.Addr = url
 	webstress.logger.Log(fmt.Sprintf("Starting %d workers, pingInterval: %d\n", workerCount, pingInterval))
 	webstress.MsgCounter = models.NewMsgCounter(5)
 
 	for i := 0; i < workerCount; i++ {
-		w := Worker{addr: url, pingInterval: pingInterval, wg: &webstress.wg, WSData: models.NewWebsocketData(i, webstress.MsgCounter), logger: webstress.logger}
+		w := Worker{addr: url, pingInterval: pingInterval, wg: &webstress.wg, WSData: models.NewWebsocketData(i, webstress.MsgCounter), logger: webstress.logger, recover: recover}
 		webstress.Workers = append(webstress.Workers, &w)
 	}
 }
@@ -42,7 +47,7 @@ func (webstress *WebStress) Init(url string, workerCount int, pingInterval int) 
 func (webstress *WebStress) Start() {
 	// log.Printf("Starting %d workers, pingInterval: %d\n", workerCount, pingInterval)
 	for _, worker := range webstress.Workers {
-		go worker.run()
+		go worker.runWithRecovery()
 		time.Sleep(time.Millisecond * 10)
 	}
 
@@ -55,13 +60,25 @@ func (webstress *WebStress) SetLogger(l *models.Logger) {
 	webstress.logger = l
 }
 
-func (w *Worker) run() {
+func (w *Worker) runWithRecovery() {
 	w.wg.Add(1)
 	defer func() {
 		w.WSData.Connected = false
 		w.wg.Done()
 	}()
 
+	// Run worker until it crashes
+	for {
+		err := w.run()
+
+		if !w.recover || (err != nil && errors.Is(err, UnrecoverableError)) {
+			return
+		}
+		w.logger.Log(fmt.Sprintf("[Worker %d] Reconnecting...\n", w.WSData.ID+1))
+	}
+}
+
+func (w *Worker) run() error {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
@@ -70,7 +87,7 @@ func (w *Worker) run() {
 	c, _, err := websocket.DefaultDialer.Dial(w.addr, header)
 	if err != nil {
 		w.logger.Log(fmt.Sprintf("[Worker %d] Error while connecting to websocket: %v\n", w.WSData.ID+1, err))
-		return
+		return UnrecoverableError
 	}
 	defer c.Close()
 
@@ -113,12 +130,12 @@ func (w *Worker) run() {
 	for {
 		select {
 		case <-done:
-			return
+			return nil
 		case <-pingTicker.C:
 			err := c.WriteMessage(websocket.PingMessage, []byte{})
 			if err != nil {
 				w.logger.Log(fmt.Sprintf("[Worker %d] Error while writing ping message: %v\n", w.WSData.ID+1, err))
-				return
+				return RecoverableError
 			}
 		case <-interrupt:
 			// Cleanly close the connection by sending a close message and then
@@ -126,13 +143,13 @@ func (w *Worker) run() {
 			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
 				w.logger.Log(fmt.Sprintf("[Worker %d] Error while writing close message: %v\n", w.WSData.ID+1, err))
-				return
+				return UnrecoverableError
 			}
 			select {
 			case <-done:
 			case <-time.After(time.Second):
 			}
-			return
+			return UnrecoverableError
 		}
 	}
 }
