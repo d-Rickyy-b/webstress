@@ -3,6 +3,7 @@ module github.com/d-Rickyy-b/webstress
 go 1.21
 
 require (
+	github.com/akamensky/argparse v1.4.0
 	github.com/gdamore/tcell/v2 v2.6.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/paulbellamy/ratecounter v0.2.0
