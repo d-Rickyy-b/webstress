@@ -64,7 +64,7 @@ func (w WebsocketView) Draw(screen tcell.Screen) {
 	for _, connection := range w.Connections {
 		tmpStr := fmt.Sprintf(formatString, connection.ID, connection.MessageCount())
 		tmpSize := len(tmpStr)
-		maxLength = util.Max(maxLength, tmpSize)
+		maxLength = max(maxLength, tmpSize)
 	}
 
 	// Calculate number of elements per row

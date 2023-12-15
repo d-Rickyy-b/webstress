@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/d-Rickyy-b/webstress/internal/util"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -36,29 +35,25 @@ func (g *GraphView) Draw(screen tcell.Screen) {
 	}
 
 	lastEntries := g.GetLastEntries(width)
-	var max, min uint64
-	min = ^uint64(0)
+	var maxValue, minValue uint64
+	minValue = ^uint64(0) // Max uint64
 	for i := 0; i < len(lastEntries); i++ {
-		if lastEntries[i] > max {
-			max = lastEntries[i]
-		}
-		if lastEntries[i] < min {
-			min = lastEntries[i]
-		}
+		maxValue = max(maxValue, lastEntries[i])
+		minValue = min(minValue, lastEntries[i])
 	}
 
-	g.Box.SetTitle(fmt.Sprintf(" Messages / Second | Max: %d | Min: %d ", max, min))
+	g.Box.SetTitle(fmt.Sprintf(" Messages / Second | Max: %d | Min: %d ", maxValue, minValue))
 
-	stepSize := util.Max((max-min)/uint64(height-1), 1)
-	barWidth := width / util.Max(len(lastEntries), 1)
+	stepSize := max((maxValue-minValue)/uint64(height-1), 1)
+	barWidth := width / max(len(lastEntries), 1)
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
 	// Draw chart
 	for i := 0; i < len(lastEntries); i++ {
-		colHeight := util.Max(int((lastEntries[i]-min)/stepSize), 1)
-		colHeight = util.Min(colHeight, height-1)
+		colHeight := max(int((lastEntries[i]-minValue)/stepSize), 1)
+		colHeight = min(colHeight, height-1)
 
 		for j := 0; j < colHeight; j++ {
 			for k := 0; k < barWidth; k++ {
@@ -84,7 +79,7 @@ func (g *GraphView) GetSize() int {
 }
 
 func (g *GraphView) GetLastEntries(num int) []uint64 {
-	num = util.Min(num, g.GetSize())
+	num = min(num, g.GetSize())
 
 	g.mu.RLock()
 	defer g.mu.RUnlock()

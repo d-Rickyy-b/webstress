@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/d-Rickyy-b/webstress/internal/util"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -34,7 +33,7 @@ func (l *Logger) GetSize() int {
 }
 
 func (l *Logger) GetLastEntries(num int) []string {
-	num = util.Min(num, l.GetSize())
+	num = min(num, l.GetSize())
 
 	l.mu.RLock()
 	defer l.mu.RUnlock()
