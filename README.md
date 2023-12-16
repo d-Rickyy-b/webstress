@@ -16,11 +16,19 @@ Using webstress is simple. You can either download and compile the code by yours
 
 ```
 Usage of webstress:
-  -pingInterval int
-        number of seconds between pings (default 30)
-  -remoteAddr string
-        remote address to connect to (default "ws://localhost:8080/")
-  -workerCount int
-        number of workers to start (default 30)
+usage: webstress [-h|--help] -a|--remote-addr "<value>" [-r|--recover]
+                 [-p|--ping-interval <integer>] [-w|--worker-count <integer>]
+                 [-l|--ratelimit <integer>]
+
+                 Websocket stress tool developed in Go
+
+Arguments:
+
+  -h  --help           Print help information
+  -a  --remote-addr    remote address to connect to
+  -r  --recover        recover from certain errors. Default: true
+  -p  --ping-interval  number of seconds between pings. Default: 30
+  -w  --worker-count   number of workers to start. Default: 30
+  -l  --ratelimit      rate limit in messages per second per websocket. Default: 0
 ```
 
