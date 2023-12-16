@@ -112,21 +112,7 @@ func (w *Worker) run() error {
 	done := make(chan struct{})
 
 	// Start background goroutine to read messages from the websocket
-	go func() {
-		defer close(done)
-		for {
-			_, _, err := c.ReadMessage()
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
-					w.logger.Log(fmt.Sprintf("[Worker %d] Error while reading message: %v\n", w.WSData.ID+1, err))
-					return
-				}
-				w.logger.Log(fmt.Sprintf("[Worker %d] Error while reading message: %v\n", w.WSData.ID+1, err))
-				return
-			}
-			w.WSData.IncCounter()
-		}
-	}()
+	go w.listen(done, c)
 
 	w.WSData.Connected = true
 
@@ -158,5 +144,22 @@ func (w *Worker) run() error {
 			}
 			return UnrecoverableError
 		}
+	}
+}
+
+// listen listens for messages from the websocket and increments the message counter.
+func (w *Worker) listen(done chan struct{}, c *websocket.Conn) {
+	defer close(done)
+	for {
+		_, _, readErr := c.ReadMessage()
+		if readErr != nil {
+			if websocket.IsUnexpectedCloseError(readErr, websocket.CloseGoingAway, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
+				w.logger.Log(fmt.Sprintf("[Worker %d] Error while reading message: %v\n", w.WSData.ID+1, readErr))
+				return
+			}
+			w.logger.Log(fmt.Sprintf("[Worker %d] Error while reading message: %v\n", w.WSData.ID+1, readErr))
+			return
+		}
+		w.WSData.IncCounter()
 	}
 }
