@@ -8,6 +8,7 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/paulbellamy/ratecounter v0.2.0
 	github.com/rivo/tview v0.0.0-20231126152417-33a1d271f2b6
+	golang.org/x/time v0.5.0
 )
 
 require (

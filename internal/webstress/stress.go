@@ -1,14 +1,17 @@
 package webstress
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
+	"golang.org/x/time/rate"
 
 	"github.com/d-Rickyy-b/webstress/internal/models"
 )
@@ -31,9 +34,10 @@ type Worker struct {
 	logger       *models.Logger
 	wg           *sync.WaitGroup
 	recover      bool
+	rateLimit    int
 }
 
-func (webstress *WebStress) Init(url string, workerCount int, pingInterval int, recover bool) {
+func (webstress *WebStress) Init(url string, workerCount, pingInterval, rateLimit int, recover bool) {
 	webstress.Addr = url
 	webstress.logger.Log(fmt.Sprintf("Starting %d workers, pingInterval: %d\n", workerCount, pingInterval))
 	webstress.MsgCounter = models.NewMsgCounter(5)
@@ -46,6 +50,7 @@ func (webstress *WebStress) Init(url string, workerCount int, pingInterval int, 
 			WSData:       models.NewWebsocketData(i, webstress.MsgCounter),
 			logger:       webstress.logger,
 			recover:      recover,
+			rateLimit:    rateLimit,
 		}
 		webstress.Workers = append(webstress.Workers, &w)
 	}
@@ -149,8 +154,18 @@ func (w *Worker) run() error {
 
 // listen listens for messages from the websocket and increments the message counter.
 func (w *Worker) listen(done chan struct{}, c *websocket.Conn) {
+	l := rate.NewLimiter(rate.Limit(w.rateLimit), 10)
+
 	defer close(done)
 	for {
+		if w.rateLimit > 0 {
+			waitErr := l.Wait(context.Background())
+			if waitErr != nil {
+				w.logger.Log(fmt.Sprintf("[Worker %d] Error while waiting for rate limit: %v\n", w.WSData.ID+1, waitErr))
+				return
+			}
+		}
+
 		_, _, readErr := c.ReadMessage()
 		if readErr != nil {
 			if websocket.IsUnexpectedCloseError(readErr, websocket.CloseGoingAway, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {

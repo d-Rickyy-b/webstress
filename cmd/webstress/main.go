@@ -20,6 +20,7 @@ func main() {
 	recoverError := parser.Flag("r", "recover", &argparse.Options{Required: false, Help: "recover from certain errors", Default: true})
 	pingInterval := parser.Int("p", "ping-interval", &argparse.Options{Required: false, Help: "number of seconds between pings", Default: 30})
 	workerCount := parser.Int("w", "worker-count", &argparse.Options{Required: false, Help: "number of workers to start", Default: 30})
+	rateLimit := parser.Int("l", "ratelimit", &argparse.Options{Required: false, Help: "rate limit in messages per second per websocket", Default: 0})
 	noUI := parser.Flag("", "noUI", &argparse.Options{Required: false, Help: "use to disable the UI", Default: false})
 	_ = noUI
 
@@ -42,7 +43,7 @@ func main() {
 
 	stress := &webstress.WebStress{}
 	stress.SetLogger(logger)
-	stress.Init(*remoteAddr, *workerCount, *pingInterval, *recoverError)
+	stress.Init(*remoteAddr, *workerCount, *pingInterval, *rateLimit, *recoverError)
 	go stress.Start()
 
 	cui.RegisterWebstress(stress)
