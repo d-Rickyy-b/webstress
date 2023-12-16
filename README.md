@@ -8,6 +8,12 @@ I came across the python tool [wsstat](https://github.com/Fitblip/wsstat) by [Fi
 
 Sadly I ran into troubles installing the tool, so I decided to create my own.
 
+Webstress connects to a websocket server, receives messages sent by the server and counts them.
+It is able to connect via an arbitrary amount of workers, which will receive messages from the server in parallel.
+This helped my stress test my websocket server and monitor how it behaved under load.
+
+For a more advanced tool check out [websocat](https://github.com/vi/websocat).
+
 ## Screenshot
 ![webstress screenshot](https://github.com/d-Rickyy-b/webstress/blob/master/docs/img/webstress_impression.png?raw=true)
 
