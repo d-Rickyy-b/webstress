@@ -39,7 +39,14 @@ func (webstress *WebStress) Init(url string, workerCount int, pingInterval int, 
 	webstress.MsgCounter = models.NewMsgCounter(5)
 
 	for i := 0; i < workerCount; i++ {
-		w := Worker{addr: url, pingInterval: pingInterval, wg: &webstress.wg, WSData: models.NewWebsocketData(i, webstress.MsgCounter), logger: webstress.logger, recover: recover}
+		w := Worker{
+			addr:         url,
+			pingInterval: pingInterval,
+			wg:           &webstress.wg,
+			WSData:       models.NewWebsocketData(i, webstress.MsgCounter),
+			logger:       webstress.logger,
+			recover:      recover,
+		}
 		webstress.Workers = append(webstress.Workers, &w)
 	}
 }
@@ -132,17 +139,17 @@ func (w *Worker) run() error {
 		case <-done:
 			return nil
 		case <-pingTicker.C:
-			err := c.WriteMessage(websocket.PingMessage, []byte{})
-			if err != nil {
-				w.logger.Log(fmt.Sprintf("[Worker %d] Error while writing ping message: %v\n", w.WSData.ID+1, err))
+			writeErr := c.WriteMessage(websocket.PingMessage, []byte{})
+			if writeErr != nil {
+				w.logger.Log(fmt.Sprintf("[Worker %d] Error while writing ping message: %v\n", w.WSData.ID+1, writeErr))
 				return RecoverableError
 			}
 		case <-interrupt:
 			// Cleanly close the connection by sending a close message and then
 			// waiting (with timeout) for the server to close the connection.
-			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				w.logger.Log(fmt.Sprintf("[Worker %d] Error while writing close message: %v\n", w.WSData.ID+1, err))
+			writeErr := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			if writeErr != nil {
+				w.logger.Log(fmt.Sprintf("[Worker %d] Error while writing close message: %v\n", w.WSData.ID+1, writeErr))
 				return UnrecoverableError
 			}
 			select {
