@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2023-12-16
+
+### Added
+- Make websockets recover from certain errors
+- Implement ratelimiting for websockets
+
+### Fixed
+- Fixed display issue with Msg/s/socket
+
+
 ## [1.1.0] - 2023-04-02
 
 ### Security
@@ -20,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 First release
 
 
-[unreleased]: https://github.com/d-Rickyy-b/webstress/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/d-Rickyy-b/webstress/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/d-Rickyy-b/webstress/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/d-Rickyy-b/webstress/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/d-Rickyy-b/webstress/releases/tag/v1.0.0
