@@ -42,6 +42,10 @@ func (g *GraphView) Draw(screen tcell.Screen) {
 		minValue = min(minValue, lastEntries[i])
 	}
 
+	if len(lastEntries) == 0 {
+		minValue = 0
+	}
+
 	g.Box.SetTitle(fmt.Sprintf(" Messages / Second | Max: %d | Min: %d ", maxValue, minValue))
 
 	stepSize := max((maxValue-minValue)/uint64(height-1), 1)
