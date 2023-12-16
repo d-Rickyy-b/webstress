@@ -14,6 +14,13 @@ type Logger struct {
 	mu    sync.RWMutex
 }
 
+// Write implements the io.Writer interface.
+func (l *Logger) Write(p []byte) (n int, err error) {
+	l.Log(string(p))
+	return len(p), nil
+}
+
+// Log adds a new entry to the logger.
 func (l *Logger) Log(text string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
